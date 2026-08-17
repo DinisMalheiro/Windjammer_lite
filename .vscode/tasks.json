@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Raylib Project",
+            "type": "process",
+            "command": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
+            "args": ["main.c", "player.c", "background.c",
+                "-g",
+                "-o",
+                "main.exe",
+                "-lraylib",
+                "-lopengl32",
+                "-lgdi32",
+                "-lwinmm"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        }
+    ]
+}

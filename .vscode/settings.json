@@ -1,0 +1,59 @@
+{
+    "cmake.additionalCompilerSearchDirs": [
+        "C:/msys64/ucrt64/bin",
+        "C:/msys64/mingw64/bin",
+        "C:/msys64/mingw32/bin",
+        "C:/msys64/clang32/bin",
+        "C:/msys64/clang64/bin",
+        "C:/msys64/clangarm64/bin"
+    ],
+
+    "debug.onTaskErrors": "debugAnyway",
+
+    "C_Cpp.intelliSenseEngine": "default",
+
+    "clangd.path": "c:\\Users\\Tatiana\\AppData\\Roaming\\Code\\User\\globalStorage\\llvm-vs-code-extensions.vscode-clangd\\install\\22.1.6\\clangd_22.1.6\\bin\\clangd.exe",
+
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "path": "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
+        },
+        "Command Prompt": {
+            "path": "C:\\WINDOWS\\System32\\cmd.exe",
+            "args": []
+        },
+        "Git Bash": {
+            "source": "Git Bash",
+            "icon": "terminal-git-bash"
+        },
+        "MSYS2 UCRT64": {
+            "path": "C:\\msys64\\usr\\bin\\bash.exe",
+            "args": [
+                "--login",
+                "-i"
+            ],
+            "env": {
+                "MSYSTEM": "UCRT64",
+                "CHERE_INVOKING": "1"
+            }
+        },
+        "bash (MSYS2)": {
+            "path": "C:\\msys64\\usr\\bin\\bash.exe",
+            "args": [
+                "--login",
+                "-i"
+            ],
+            "env": {
+                "CHERE_INVOKING": "1"
+            }
+        }
+    },
+
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+
+    "terminal.integrated.automationShell.windows": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+
+    "terminal.integrated.cwd": "${workspaceFolder}"
+}
