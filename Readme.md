@@ -9,4 +9,4 @@ The player controls a character on a court and throws a disc towards the opponen
 The project is being developed in C using Raylib, with a focus on recreating the basic movement, animation and arcade gameplay of the original.
 
 
-**Author:** Dinis  
+**Author:** Dinis Malheiro

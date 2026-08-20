@@ -7,7 +7,7 @@ void BackgroundInit(Background *background)
     background->frame = 0;
     background->frameCount = 0;
     background->animationTimer = 0.0f;
-    background->frameTime = 0.15f;
+    background->frameTime = 0.09f;
     background->objectCount = 0;
 
     for (int i = 0; i < MAX_BACKGROUND_FRAMES; i++)

@@ -40,7 +40,17 @@ void PlayerInit(Player *player, Vector2 position)
 {
     player->position = position;
     player->velocity = (Vector2){0};
+
+    player->facingDirection = (Vector2){1.0f, 0.0f};
+
     player->speed = 150.0f;
+
+    player->hasDisk = true;
+
+    player->side = PLAYER_SIDE_LEFT;
+
+    player->throwAngle = 30.0f;
+
     player->playerSprite = (Texture2D){0};
 
     // Sprite sheet
@@ -54,7 +64,8 @@ void PlayerInit(Player *player, Vector2 position)
     // Animation
     player->animationTimer = 0.0f;
     player->frameTime = 0.12f;
-    player->animation = -1; //reset animation when starting
+    player->animation = -1;
+
     PlayerSetAnimation(player, PLAYER_ANIM_IDLE);
 }
 
@@ -62,6 +73,29 @@ void PlayerInit(Player *player, Vector2 position)
 void PlayerUpdate(Player *player)
 {
     float deltaTime = GetFrameTime();
+
+
+    // Cannot move while holding disk
+    if (player->hasDisk)
+    {
+        player->velocity = (Vector2){0};
+
+        PlayerSetAnimation(player, PLAYER_ANIM_IDLE);
+
+        // Still animate while holding the disk
+        player->animationTimer += deltaTime;
+
+        if (player->animationTimer >= player->frameTime)
+        {
+            player->animationTimer -= player->frameTime;
+            player->frame++;
+
+            if (player->frame >= player->columns)
+                player->frame = 0;
+        }
+
+        return;
+    }
 
     // Read input
     player->velocity = (Vector2){0};
@@ -78,12 +112,10 @@ void PlayerUpdate(Player *player)
     if (IsKeyDown(KEY_D))
         player->velocity.x += 1.0f;
 
-    // Check if player is moving
     bool isMoving =
         player->velocity.x != 0.0f ||
         player->velocity.y != 0.0f;
 
-    // Normalize diagonal movement
     if (isMoving)
     {
         float length = sqrtf(
@@ -96,6 +128,9 @@ void PlayerUpdate(Player *player)
             player->velocity.x /= length;
             player->velocity.y /= length;
         }
+
+        // Remember the direction the player was moving
+        player->facingDirection = player->velocity;
 
         // Move player
         player->position.x +=
@@ -112,7 +147,6 @@ void PlayerUpdate(Player *player)
     }
     else if (fabsf(player->velocity.x) > fabsf(player->velocity.y))
     {
-        // Horizontal movement
         if (player->velocity.x > 0.0f)
             PlayerSetAnimation(player, PLAYER_ANIM_WALK_RIGHT);
         else
@@ -120,7 +154,6 @@ void PlayerUpdate(Player *player)
     }
     else
     {
-        // Vertical movement
         if (player->velocity.y > 0.0f)
             PlayerSetAnimation(player, PLAYER_ANIM_WALK_DOWN);
         else
@@ -165,13 +198,7 @@ void PlayerDraw(const Player *player)
         };
 
         DrawTexturePro(
-            player->playerSprite,
-            sourceRec,
-            destRec,
-            origin,
-            0.0f,
-            WHITE
-        );
+            player->playerSprite, sourceRec, destRec, origin, 0.0f, WHITE);
     }
     else
     {
@@ -198,3 +225,70 @@ void PlayerSetTexture(Player *player, const char *texturePath)
 
     player->playerSprite = LoadTexture(texturePath);
 }
+
+//map collisions
+void PlayerUpdateMapLimits(Player *player, Rectangle area)
+{
+    float halfWidth = player->frameWidth / 2.0f;
+    float halfHeight = player->frameHeight / 2.0f;
+
+    if (player->position.x < area.x + halfWidth)
+        player->position.x = area.x + halfWidth;
+
+    if (player->position.x > area.x + area.width - halfWidth)
+        player->position.x = area.x + area.width - halfWidth;
+
+    if (player->position.y < area.y + halfHeight)
+        player->position.y = area.y + halfHeight;
+
+    if (player->position.y > area.y + area.height - halfHeight)
+        player->position.y = area.y + area.height - halfHeight;
+}
+
+Vector2 PlayerGetThrowDirection(const Player *player)
+{
+    Vector2 forward;
+
+    // Player on left side throws toward the right
+    if (player->side == PLAYER_SIDE_LEFT)
+    {
+        forward = (Vector2){1.0f, 0.0f};
+    }
+    // Player on right side throws toward the left
+    else
+    {
+        forward = (Vector2){-1.0f, 0.0f};
+    }
+
+    float angle = 0.0f;
+
+    /*
+     * W = throw upward
+     * S = throw downward
+     *
+     * A/D do not allow backward throws.
+     */
+    if (IsKeyDown(KEY_W))
+    {
+        angle = -player->throwAngle;
+    }
+    else if (IsKeyDown(KEY_S))
+    {
+        angle = player->throwAngle;
+    }
+
+    float radians = angle * DEG2RAD;
+
+    Vector2 direction;
+
+    direction.x =
+        forward.x * cosf(radians) -
+        forward.y * sinf(radians);
+
+    direction.y =
+        forward.x * sinf(radians) +
+        forward.y * cosf(radians);
+
+    return direction;
+}
+
