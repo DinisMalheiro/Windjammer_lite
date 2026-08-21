@@ -24,6 +24,8 @@ typedef struct Player
     Vector2 velocity;
     Vector2 facingDirection;
 
+    bool canMove;
+
     float speed;
 
     bool hasDisk;
@@ -32,6 +34,11 @@ typedef struct Player
 
     // Throwing
     float throwAngle;
+
+    // Disk catching
+    float catchRadius;
+    float throwTimer;
+    float throwDelay;
 
     Texture2D playerSprite;
 

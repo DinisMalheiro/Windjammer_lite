@@ -43,24 +43,23 @@
     1- Approximately 300 lines of code
 
 
-## Session 3 – X/08/2026 
+## Session 3 – 21/08/2026 
 
 **Todays implementations:**
-    1- 
-    2- 
-    3- 
-    4- 
-    5- 
+    1- Implemented disk collision with the top and bottom map walls, causing the disk to ricochet
+    2- Added left and right goal detection with three adjustable goal zones, including a larger middle zone
+    3- Implemented goal behavior, including temporary right-side ricochet for debugging and left-side disk return
+    4- Added disk catch detection with an adjustable player catch radius
+    5- Added throw delay logic so the player cannot immediately catch the disk after throwing, while keeping player movement locked when holding the disk
 
 **Dificulties:**
-    1- 
-    2- 
-    3- 
+    1- Managing the different disk states between holding, throwing, bouncing, and catching
+    2- Organizing goal collision zones and keeping the collision behavior easy to adjust for future gameplay changes
 
 **Todo next:** 
-    1- 
-    2- 
+    1- Create the CPU AI
+    2- Implement basic CPU movement, throwing, and catching behavior
 
 **What whas writen:** 
-    1- Approximately  lines of code
+    1- Approximately 250 lines of code
 

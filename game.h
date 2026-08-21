@@ -13,6 +13,17 @@ typedef enum GameScreen
     GAME_SCREEN_GAMEPLAY
 } GameScreen;
 
+typedef struct Goal
+{
+    float x;
+
+    float top;
+    float zone1Bottom;
+    float zone2Bottom;
+    float bottom;
+
+} Goal;
+
 typedef struct Game
 {
     // Virtual resolution
@@ -32,6 +43,12 @@ typedef struct Game
 
     // Player movement area
     Rectangle playerArea;
+    
+    // Disk collision area
+    Rectangle diskArena;
+
+    Goal leftGoal;
+    Goal rightGoal;
 
 } Game;
 

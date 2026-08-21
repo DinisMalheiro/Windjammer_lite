@@ -13,6 +13,9 @@ typedef struct Disk
     bool held;
     bool thrown;
 
+    // Time before the disk can be caught after throwing
+    float catchTimer;
+
     Texture2D texture;
 } Disk;
 
@@ -21,7 +24,7 @@ void DiskUpdate(Disk *disk);
 void DiskDraw(const Disk *disk);
 void DiskUnload(Disk *disk);
 
-bool DiskPlayerCollision(const Disk *disk, const Vector2 playerPosition);
+bool DiskPlayerCollision(const Disk *disk, const Vector2 playerPosition, float radius);
 
 void DiskPickup(Disk *disk);
 void DiskThrow(Disk *disk, Vector2 direction);

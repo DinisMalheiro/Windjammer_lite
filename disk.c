@@ -12,6 +12,8 @@ void DiskInit(Disk *disk, Vector2 position)
     disk->held = false;
     disk->thrown = false;
 
+    disk->catchTimer = 0.0f;
+
     disk->texture = (Texture2D){0};
 }
 
@@ -21,6 +23,14 @@ void DiskUpdate(Disk *disk)
         return;
 
     float deltaTime = GetFrameTime();
+
+    if (disk->catchTimer > 0.0f)  // Disk cannot be caught immediately after being thrown
+    {
+        disk->catchTimer -= deltaTime;
+
+        if (disk->catchTimer < 0.0f)
+            disk->catchTimer = 0.0f;
+    }
 
     disk->position.x += disk->velocity.x * deltaTime;
     disk->position.y += disk->velocity.y * deltaTime;
@@ -44,11 +54,9 @@ void DiskUnload(Disk *disk)
     }
 }
 
-bool DiskPlayerCollision(const Disk *disk, const Vector2 playerPosition)
+bool DiskPlayerCollision(const Disk *disk, const Vector2 playerPosition, float radius)
 {
-    float distance = Vector2Distance(disk->position, playerPosition);
-
-    return distance < 25.0f;
+    return Vector2Distance(disk->position, playerPosition) <= radius;
 }
 
 void DiskPickup(Disk *disk)
@@ -73,6 +81,8 @@ void DiskThrow(Disk *disk, Vector2 direction)
 
     disk->held = false;
     disk->thrown = true;
+
+    disk->catchTimer = 0.25f;
 
     disk->velocity.x = direction.x * disk->speed;
     disk->velocity.y = direction.y * disk->speed;

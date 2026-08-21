@@ -51,7 +51,14 @@ void PlayerInit(Player *player, Vector2 position)
 
     player->throwAngle = 30.0f;
 
+    player->catchRadius = 20.0f;
+
     player->playerSprite = (Texture2D){0};
+
+    player->canMove = false;
+    player->throwTimer = 0.0f;
+    player->throwDelay = 0.2f;
+    player->catchRadius = 20.0f;
 
     // Sprite sheet
     player->frame = 0;
@@ -74,15 +81,41 @@ void PlayerUpdate(Player *player)
 {
     float deltaTime = GetFrameTime();
 
-
-    // Cannot move while holding disk
-    if (player->hasDisk)
+        if (player->hasDisk)
     {
         player->velocity = (Vector2){0};
-
         PlayerSetAnimation(player, PLAYER_ANIM_IDLE);
 
-        // Still animate while holding the disk
+        player->animationTimer += deltaTime;
+
+        if (player->animationTimer >= player->frameTime)
+        {
+            player->animationTimer -= player->frameTime;
+            player->frame++;
+
+            if (player->frame >= player->columns)
+                player->frame = 0;
+        }
+
+        return;
+    }
+
+    if (player->throwTimer > 0.0f)
+    {
+        player->throwTimer -= deltaTime;
+
+        if (player->throwTimer <= 0.0f)
+        {
+            player->throwTimer = 0.0f;
+            player->canMove = true;
+        }
+    }
+
+    if (!player->canMove)
+    {
+        player->velocity = (Vector2){0};
+        PlayerSetAnimation(player, PLAYER_ANIM_IDLE);
+
         player->animationTimer += deltaTime;
 
         if (player->animationTimer >= player->frameTime)
