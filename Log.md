@@ -63,3 +63,26 @@
 **What whas writen:** 
     1- Approximately 250 lines of code
 
+
+
+## Session 4 – 23/08/2026 
+
+**Todays implementations:**
+    1- Added basic CPU opponent with restricted movement area
+    2- Added CPU movement, disk catching, throwing, and throw delays
+    3- Added CPU animation system with mirrored sprite rendering
+    4- Added five throw directions for both player and CPU using different throw angles
+    5- Added score variables and game countdown timer
+    6- Added point logic so the player who loses a point receives the disk
+    7- Removed the temporary enemy-side disk ricochet debug behavior
+
+**Dificulties:**
+    1- Cpu logic implementation
+
+**Todo next:** 
+    1- menus
+    2- ui
+
+**What whas writen:** 
+    1- Approximately 400 lines of code
+

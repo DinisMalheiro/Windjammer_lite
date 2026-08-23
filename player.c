@@ -49,7 +49,7 @@ void PlayerInit(Player *player, Vector2 position)
 
     player->side = PLAYER_SIDE_LEFT;
 
-    player->throwAngle = 30.0f;
+    player->throwAngle = 60.0f;
 
     player->catchRadius = 20.0f;
 
@@ -282,45 +282,35 @@ Vector2 PlayerGetThrowDirection(const Player *player)
 {
     Vector2 forward;
 
-    // Player on left side throws toward the right
     if (player->side == PLAYER_SIDE_LEFT)
-    {
         forward = (Vector2){1.0f, 0.0f};
-    }
-    // Player on right side throws toward the left
     else
-    {
         forward = (Vector2){-1.0f, 0.0f};
-    }
 
     float angle = 0.0f;
 
+    bool up = IsKeyDown(KEY_W);
+    bool down = IsKeyDown(KEY_S);
+    bool sideAngle = player->side == PLAYER_SIDE_LEFT ? IsKeyDown(KEY_A) : IsKeyDown(KEY_D);
+
     /*
-     * W = throw upward
-     * S = throw downward
-     *
-     * A/D do not allow backward throws.
+     * A + W / D + W = maximum upward angle
+     * W              = half upward angle
+     * Nothing        = straight forward
+     * S              = half downward angle
+     * A + S / D + S = maximum downward angle
      */
-    if (IsKeyDown(KEY_W))
-    {
-        angle = -player->throwAngle;
-    }
-    else if (IsKeyDown(KEY_S))
-    {
-        angle = player->throwAngle;
-    }
+    if (up)
+        angle = sideAngle ? -player->throwAngle : -player->throwAngle * 0.5f;
+    else if (down)
+        angle = sideAngle ? player->throwAngle : player->throwAngle * 0.5f;
 
     float radians = angle * DEG2RAD;
 
     Vector2 direction;
 
-    direction.x =
-        forward.x * cosf(radians) -
-        forward.y * sinf(radians);
-
-    direction.y =
-        forward.x * sinf(radians) +
-        forward.y * cosf(radians);
+    direction.x = forward.x * cosf(radians) - forward.y * sinf(radians);
+    direction.y = forward.x * sinf(radians) + forward.y * cosf(radians);
 
     return direction;
 }

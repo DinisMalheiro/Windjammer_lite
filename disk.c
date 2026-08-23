@@ -7,7 +7,7 @@ void DiskInit(Disk *disk, Vector2 position)
     disk->position = position;
     disk->velocity = (Vector2){0};
 
-    disk->speed = 250.0f;
+    disk->speed = 350.0f;
 
     disk->held = false;
     disk->thrown = false;

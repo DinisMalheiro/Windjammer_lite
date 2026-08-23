@@ -6,6 +6,7 @@
 #include "background.h"
 #include "player.h"
 #include "disk.h"
+#include "cpu.h"
 
 typedef enum GameScreen
 {
@@ -26,30 +27,30 @@ typedef struct Goal
 
 typedef struct Game
 {
-    // Virtual resolution
     int gameWidth;
     int gameHeight;
 
-    // Current screen
     GameScreen screen;
 
-    // Game render target
     RenderTexture2D target;
 
-    // Game objects
     Background background;
     Player player;
+    CPU cpu;
     Disk disk;
 
-    // Player movement area
     Rectangle playerArea;
-    
-    // Disk collision area
+    Rectangle cpuArea;
     Rectangle diskArena;
 
     Goal leftGoal;
     Goal rightGoal;
 
+    int leftScore;
+    int rightScore;
+
+    float gameTime;
+    float gameTimer;
 } Game;
 
 void GameInit(Game *game);

@@ -1,6 +1,7 @@
 #include "game.h"
 #include "raylib.h"
 #include <math.h>
+#include "raymath.h"
 
 static void GameUpdate(Game *game);
 static void GameDraw(Game *game);
@@ -15,7 +16,6 @@ static int GameGetGoalZone(const Goal *goal, Vector2 diskPosition);
 static void GameHandleGoal(Game *game, int side, int zone);
 
 static bool GameTryCatchDisk(Game *game);
-
 
 void GameInit(Game *game)
 {
@@ -43,21 +43,29 @@ void GameInit(Game *game)
 
     BackgroundAddObject(&game->background, "assets/Sandmap/Map_net.png", (Vector2){8, 0});
 
+    // Player and CPU areas
+    game->playerArea = (Rectangle){0, 30, game->gameWidth / 2 + 10, game->gameHeight - 48};
+    game->cpuArea = (Rectangle){game->gameWidth / 2 - 10, 30, game->gameWidth / 2 + 10, game->gameHeight - 48};
+
     // Player
     PlayerInit(&game->player, (Vector2){50, 120});
     PlayerSetTexture(&game->player, "assets/Girl1_movement.png");
 
-    game->playerArea = (Rectangle){0, 30, game->gameWidth / 2 + 10, game->gameHeight - 48};
+    // CPU
+    CPUInit(&game->cpu, (Vector2){270, 120}, game->cpuArea);
+    CPUSetTexture(&game->cpu, "assets/Girl1_movement.png");
 
     // Disk
     DiskInit(&game->disk, game->player.position);
 
+    game->player.hasDisk = true;
+    game->cpu.hasDisk = false;
     game->disk.held = true;
     game->disk.thrown = false;
+    game->disk.velocity = (Vector2){0};
 
-
-     // Disk collision area
-    game->diskArena = (Rectangle){0, 30, 320, 146};
+    // Disk collision area
+    game->diskArena = (Rectangle){0, 40, 320, 146};
 
     // Goal X coordinates
     game->leftGoal.x = 0;
@@ -79,6 +87,13 @@ void GameInit(Game *game)
     game->rightGoal.zone2Bottom = 136;
     game->rightGoal.bottom = 176;
 
+    // Score
+    game->leftScore = 0;
+    game->rightScore = 0;
+
+    // Game timer
+    game->gameTime = 180.0f;
+    game->gameTimer = game->gameTime;
 }
 
 
@@ -109,23 +124,25 @@ static void GameUpdate(Game *game)
 
 static void GameUpdateGameplay(Game *game)
 {
+    float deltaTime = GetFrameTime();
+
     BackgroundUpdate(&game->background);
+
+    // Game timer
+    if (game->gameTimer > 0.0f)
+    {
+        game->gameTimer -= deltaTime;
+
+        if (game->gameTimer < 0.0f)
+            game->gameTimer = 0.0f;
+    }
 
     PlayerUpdate(&game->player);
     PlayerUpdateMapLimits(&game->player, game->playerArea);
 
-    // DEBUG: X gives player the disk
-    if (IsKeyPressed(KEY_X))
-    {
-        game->player.hasDisk = true;
+    CPUUpdate(&game->cpu, &game->player, &game->disk);
 
-        game->disk.held = true;
-        game->disk.thrown = false;
-        game->disk.velocity = (Vector2){0};
-        game->disk.position = game->player.position;
-    }
-
-    // Throw disk
+    // Player throws disk
     if (game->player.hasDisk && IsKeyPressed(KEY_SPACE))
     {
         Vector2 throwDirection = PlayerGetThrowDirection(&game->player);
@@ -142,8 +159,38 @@ static void GameUpdateGameplay(Game *game)
     DiskUpdate(&game->disk);
     GameUpdateDiskCollision(game);
 
-    if (!game->player.hasDisk)
-        GameTryCatchDisk(game);
+    // Player catches disk
+    if (!game->player.hasDisk && game->disk.thrown && game->disk.catchTimer <= 0.0f)
+    {
+        if (Vector2Distance(game->player.position, game->disk.position) <= game->player.catchRadius)
+        {
+            game->player.hasDisk = true;
+            game->player.canMove = false;
+
+            game->disk.position = game->player.position;
+            game->disk.velocity = (Vector2){0};
+            game->disk.thrown = false;
+            game->disk.held = true;
+        }
+    }
+
+        // Game timer
+    if (game->gameTimer > 0.0f)
+    {
+        game->gameTimer -= deltaTime;
+
+        if (game->gameTimer < 0.0f)
+            game->gameTimer = 0.0f;
+
+        static int lastTimer = -1;
+        int currentTimer = (int)ceilf(game->gameTimer);
+
+        if (currentTimer != lastTimer)
+        {
+            TraceLog(LOG_INFO, "GAME TIMER: %d", currentTimer);
+            lastTimer = currentTimer;
+        }
+    }
 }
 
 
@@ -192,7 +239,7 @@ static void GameUpdateDiskCollision(Game *game)
         disk->velocity.y = -fabsf(disk->velocity.y);
     }
 
-    // Left side
+    // Left goal
     if (disk->position.x <= game->leftGoal.x)
     {
         int zone = GameGetGoalZone(&game->leftGoal, disk->position);
@@ -202,13 +249,9 @@ static void GameUpdateDiskCollision(Game *game)
             GameHandleGoal(game, -1, zone);
             return;
         }
-
-        disk->position.x = game->leftGoal.x + radius;
-        disk->velocity = (Vector2){0};
-        disk->thrown = false;
     }
 
-    // Right side
+    // Right goal
     if (disk->position.x >= game->rightGoal.x)
     {
         int zone = GameGetGoalZone(&game->rightGoal, disk->position);
@@ -218,10 +261,6 @@ static void GameUpdateDiskCollision(Game *game)
             GameHandleGoal(game, 1, zone);
             return;
         }
-
-        disk->position.x = game->rightGoal.x - radius;
-        disk->velocity = (Vector2){0};
-        disk->thrown = false;
     }
 }
 
@@ -243,39 +282,34 @@ static int GameGetGoalZone(const Goal *goal, Vector2 diskPosition)
 }
 
 static void GameHandleGoal(Game *game, int side, int zone)
-{ //debug
-    if (side > 0)
+{
+    if (side < 0)
     {
-        TraceLog(LOG_INFO, "RIGHT GOAL - ZONE %d", zone);
+        game->rightScore++;
 
-        game->disk.position.x = game->rightGoal.x - 6.0f;
-        game->disk.velocity.x = -fabsf(game->disk.velocity.x);
-    }
-    else
-    {
-        TraceLog(LOG_INFO, "LEFT GOAL - ZONE %d", zone);
-
-        game->disk.velocity = (Vector2){0};
-        game->disk.thrown = false;
+        TraceLog(LOG_INFO, "LEFT GOAL - ZONE %d - RIGHT SCORE: %d", zone, game->rightScore);
 
         game->player.hasDisk = true;
-        game->player.canMove = false;
+        game->cpu.hasDisk = false;
         game->disk.held = true;
+        game->disk.thrown = false;
+        game->disk.velocity = (Vector2){0};
         game->disk.position = game->player.position;
     }
-    /*
-    if (side < 0)
-        TraceLog(LOG_INFO, "LEFT GOAL - ZONE %d", zone);
     else
-        TraceLog(LOG_INFO, "RIGHT GOAL - ZONE %d", zone);
+    {
+        game->leftScore++;
 
-    game->disk.velocity = (Vector2){0};
-    game->disk.thrown = false;
+        TraceLog(LOG_INFO, "RIGHT GOAL - ZONE %d - LEFT SCORE: %d", zone, game->leftScore);
 
-    game->player.hasDisk = true;
-    game->disk.held = true;
-    game->disk.position = game->player.position;
-    */
+        game->player.hasDisk = false;
+        game->cpu.hasDisk = true;
+        game->disk.held = true;
+        game->disk.thrown = false;
+        game->disk.velocity = (Vector2){0};
+        game->disk.position = game->cpu.position;
+        game->cpu.throwTimer = game->cpu.throwDelay;
+    }
 }
 
 static void GameDraw(Game *game)
@@ -329,6 +363,7 @@ static void GameDrawGameplay(Game *game)
     BackgroundDraw(&game->background);
     DiskDraw(&game->disk);
     PlayerDraw(&game->player);
+    CPUDraw(&game->cpu);
 }
 
 
@@ -343,6 +378,7 @@ void GameUnload(Game *game)
 {
     DiskUnload(&game->disk);
     PlayerUnload(&game->player);
+    CPUUnload(&game->cpu);
 
     UnloadRenderTexture(game->target);
 
