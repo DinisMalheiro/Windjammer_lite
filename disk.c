@@ -1,19 +1,14 @@
 #include "disk.h"
 #include <math.h>
-#include "raymath.h"
 
 void DiskInit(Disk *disk, Vector2 position)
 {
     disk->position = position;
     disk->velocity = (Vector2){0};
-
     disk->speed = 350.0f;
-
+    disk->catchTimer = 0.0f;
     disk->held = false;
     disk->thrown = false;
-
-    disk->catchTimer = 0.0f;
-
     disk->texture = (Texture2D){0};
 }
 
@@ -24,7 +19,7 @@ void DiskUpdate(Disk *disk)
 
     float deltaTime = GetFrameTime();
 
-    if (disk->catchTimer > 0.0f)  // Disk cannot be caught immediately after being thrown
+    if (disk->catchTimer > 0.0f) // Time remaining before the disk can be caught again
     {
         disk->catchTimer -= deltaTime;
 
@@ -38,7 +33,6 @@ void DiskUpdate(Disk *disk)
 
 void DiskDraw(const Disk *disk)
 {
-    // Temporary disk
     if (disk->held)
         return;
 
@@ -48,15 +42,17 @@ void DiskDraw(const Disk *disk)
 void DiskUnload(Disk *disk)
 {
     if (disk->texture.id != 0)
-    {
         UnloadTexture(disk->texture);
-        disk->texture = (Texture2D){0};
-    }
+
+    disk->texture = (Texture2D){0};
 }
 
-bool DiskPlayerCollision(const Disk *disk, const Vector2 playerPosition, float radius)
+bool DiskPlayerCollision(const Disk *disk, Vector2 playerPosition, float radius)
 {
-    return Vector2Distance(disk->position, playerPosition) <= radius;
+    float dx = disk->position.x - playerPosition.x;
+    float dy = disk->position.y - playerPosition.y;
+
+    return sqrtf(dx * dx + dy * dy) <= radius;
 }
 
 void DiskPickup(Disk *disk)
@@ -64,14 +60,12 @@ void DiskPickup(Disk *disk)
     disk->held = true;
     disk->thrown = false;
     disk->velocity = (Vector2){0};
+    disk->catchTimer = 0.0f;
 }
 
 void DiskThrow(Disk *disk, Vector2 direction)
 {
-    float length = sqrtf(
-        direction.x * direction.x +
-        direction.y * direction.y
-    );
+    float length = sqrtf(direction.x * direction.x + direction.y * direction.y);
 
     if (length <= 0.0f)
         return;
@@ -81,9 +75,7 @@ void DiskThrow(Disk *disk, Vector2 direction)
 
     disk->held = false;
     disk->thrown = true;
-
     disk->catchTimer = 0.25f;
-
     disk->velocity.x = direction.x * disk->speed;
     disk->velocity.y = direction.y * disk->speed;
 }

@@ -86,3 +86,45 @@
 **What whas writen:** 
     1- Approximately 400 lines of code
 
+
+
+## Session 5 – 24/08/2026
+
+**Todays implementations:**
+    1- Added main menu with Play and Exit options
+    2- Added pause menu accessible with ESC during gameplay
+    3- Added pause state so gameplay stops while the pause menu is open
+    4- Added game reset when starting a new match from the main menu
+    5- Added menu navigation and selection sound effects
+    6- Added SoundManager for music and sound effects
+    7- Added menu background music
+    8- Added gameplay background music with automatic music switching
+    9- Added disk throw sound effect
+    10- Added music streaming/update support
+    11- Reorganized game audio handling into a dedicated SoundManager
+    12- Reorganized texture loading and ownership into the GameAssets/Assets system
+    13- Added new background assets and registered them in the asset manager
+    14- Improved asset loading and unloading structure
+    15- Reorganized the Background system to support separate background rendering layers
+    16- Added BACKGROUND_LAYER_BEHIND and BACKGROUND_LAYER_FRONT
+    17- Added support for drawing background objects behind and in front of gameplay entities
+    18- Updated the Background system to store texture pointers and rendering layer information
+    19- Improved separation between game logic, assets, background rendering, menus and audio systems
+
+**Difficulties:**
+    1- Getting ESC to work correctly without closing the Raylib window
+    2- Managing music changes between menu, gameplay and pause states
+    3- Organizing background objects into different rendering layers
+    4- Keeping the SoundManager responsible for loading, playing and unloading audio
+
+**Todo next:**
+    1- Finish/fix layered background integration
+    2- Add game UI
+    3- Add score display
+    4- Add countdown/game timer display
+    5- Add camera shake when a goal is scored
+    6- Continue improving menus and audio
+
+**What was written:**
+    1- Approximately 500+ lines of code
+

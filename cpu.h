@@ -29,8 +29,10 @@ typedef struct CPU
 
     PlayerSide side;
 
-    Texture2D sprite;
+    // Pointer to texture owned by GameAssets.
+    Texture2D *sprite;
 
+    // Sprite sheet
     int frame;
     int currentRow;
     int columns;
@@ -38,6 +40,7 @@ typedef struct CPU
     int frameWidth;
     int frameHeight;
 
+    // Animation
     float animationTimer;
     float frameTime;
 
@@ -46,7 +49,7 @@ typedef struct CPU
 void CPUInit(CPU *cpu, Vector2 position, Rectangle area);
 void CPUUpdate(CPU *cpu, const Player *player, Disk *disk);
 void CPUDraw(const CPU *cpu);
-void CPUSetTexture(CPU *cpu, const char *texturePath);
+void CPUSetTexture(CPU *cpu, Texture2D *texture);
 void CPUUnload(CPU *cpu);
 
 #endif

@@ -1,48 +1,43 @@
 #include "background.h"
-#include "raylib.h"
 
-// Initialize background
 void BackgroundInit(Background *background)
 {
-    background->frame = 0;
-    background->frameCount = 0;
-    background->animationTimer = 0.0f;
+    *background = (Background){0};
     background->frameTime = 0.09f;
-    background->objectCount = 0;
 
     for (int i = 0; i < MAX_BACKGROUND_FRAMES; i++)
-        background->frames[i] = (Texture2D){0};
+        background->frames[i] = 0;
+
+    for (int i = 0; i < MAX_BACKGROUND_OBJECTS; i++)
+        background->objects[i].texture = 0;
 }
 
-// Add animation frame
-void BackgroundAddFrame(Background *background, const char *texturePath)
+void BackgroundSetFrame(Background *background, int index, Texture2D *texture)
 {
-    if (background->frameCount >= MAX_BACKGROUND_FRAMES)
+    if (index < 0 || index >= MAX_BACKGROUND_FRAMES || texture == 0)
         return;
 
-    background->frames[background->frameCount] = LoadTexture(texturePath);
-    SetTextureFilter(background->frames[background->frameCount], TEXTURE_FILTER_POINT);
+    background->frames[index] = texture;
 
-    background->frameCount++;
+    if (index >= background->frameCount)
+        background->frameCount = index + 1;
 }
 
-// Add fixed background object
-void BackgroundAddObject(Background *background, const char *texturePath, Vector2 position)
+void BackgroundSetObject(Background *background,int index,Texture2D *texture,Vector2 position,BackgroundLayer layer)
 {
-    if (background->objectCount >= MAX_BACKGROUND_OBJECTS)
+    if (index < 0 ||
+        index >= MAX_BACKGROUND_OBJECTS ||
+        texture == 0)
         return;
 
-    BackgroundObject *object = &background->objects[background->objectCount];
+    background->objects[index].texture = texture;
+    background->objects[index].position = position;
+    background->objects[index].layer = layer;
 
-    object->texture = LoadTexture(texturePath);
-    object->position = position;
-
-    SetTextureFilter(object->texture, TEXTURE_FILTER_POINT);
-
-    background->objectCount++;
+    if (index >= background->objectCount)
+        background->objectCount = index + 1;
 }
 
-// Update background animation
 void BackgroundUpdate(Background *background)
 {
     if (background->frameCount <= 1)
@@ -60,31 +55,61 @@ void BackgroundUpdate(Background *background)
     }
 }
 
-// Draw background
-void BackgroundDraw(const Background *background)
+void BackgroundDrawBehind(const Background *background)
 {
-    if (background->frameCount > 0)
+    // Animated background
+    if (background->frameCount > 0 &&
+        background->frames[background->frame] != 0)
     {
-        DrawTexture(background->frames[background->frame], 8, 0, WHITE);
+        DrawTexture(
+            *background->frames[background->frame],
+            8,
+            0,
+            WHITE
+        );
     }
 
-    // Draw fixed objects
+    // Objects that go BEHIND players
     for (int i = 0; i < background->objectCount; i++)
-        DrawTexture(background->objects[i].texture, background->objects[i].position.x, background->objects[i].position.y, WHITE);
+    {
+        const BackgroundObject *object = &background->objects[i];
+
+        if (object->texture != 0 &&
+            object->layer == BACKGROUND_LAYER_BEHIND)
+        {
+            DrawTexture(
+                *object->texture,
+                (int)object->position.x,
+                (int)object->position.y,
+                WHITE
+            );
+        }
+    }
 }
 
-// Unload background
-void BackgroundUnload(Background *background)
+void BackgroundDrawFront(const Background *background)
 {
-    for (int i = 0; i < background->frameCount; i++)
-    {
-        if (background->frames[i].id != 0)
-            UnloadTexture(background->frames[i]);
-    }
-
+    // Objects that go IN FRONT of players
     for (int i = 0; i < background->objectCount; i++)
     {
-        if (background->objects[i].texture.id != 0)
-            UnloadTexture(background->objects[i].texture);
+        const BackgroundObject *object = &background->objects[i];
+
+        if (object->texture != 0 &&
+            object->layer == BACKGROUND_LAYER_FRONT)
+        {
+            DrawTexture(
+                *object->texture,
+                (int)object->position.x,
+                (int)object->position.y,
+                WHITE
+            );
+        }
     }
+}
+
+void BackgroundUnload(Background *background)
+{
+    // Textures are owned by GameAssets.
+    // Background only stores pointers to them.
+    *background = (Background){0};
 }

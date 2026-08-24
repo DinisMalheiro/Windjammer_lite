@@ -25,11 +25,9 @@ typedef struct Player
     Vector2 facingDirection;
 
     bool canMove;
-
     float speed;
 
     bool hasDisk;
-
     PlayerSide side;
 
     // Throwing
@@ -40,7 +38,8 @@ typedef struct Player
     float throwTimer;
     float throwDelay;
 
-    Texture2D playerSprite;
+    // Shared sprite asset
+    Texture2D *sprite;
 
     // Sprite sheet
     int frame;
@@ -53,7 +52,6 @@ typedef struct Player
     // Animation
     float animationTimer;
     float frameTime;
-
     PlayerAnimation animation;
 } Player;
 
@@ -61,7 +59,7 @@ void PlayerInit(Player *player, Vector2 position);
 void PlayerUpdate(Player *player);
 void PlayerDraw(const Player *player);
 void PlayerUnload(Player *player);
-void PlayerSetTexture(Player *player, const char *texturePath);
+void PlayerSetTexture(Player *player, Texture2D *texture);
 void PlayerUpdateMapLimits(Player *player, Rectangle area);
 
 Vector2 PlayerGetThrowDirection(const Player *player);

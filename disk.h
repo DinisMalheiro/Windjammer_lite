@@ -3,19 +3,13 @@
 
 #include "raylib.h"
 
-typedef struct Disk
-{
+typedef struct Disk {
     Vector2 position;
     Vector2 velocity;
-
     float speed;
-
+    float catchTimer; // Time remaining before the disk can be caught again
     bool held;
     bool thrown;
-
-    // Time before the disk can be caught after throwing
-    float catchTimer;
-
     Texture2D texture;
 } Disk;
 
@@ -23,9 +17,7 @@ void DiskInit(Disk *disk, Vector2 position);
 void DiskUpdate(Disk *disk);
 void DiskDraw(const Disk *disk);
 void DiskUnload(Disk *disk);
-
-bool DiskPlayerCollision(const Disk *disk, const Vector2 playerPosition, float radius);
-
+bool DiskPlayerCollision(const Disk *disk, Vector2 playerPosition, float radius);
 void DiskPickup(Disk *disk);
 void DiskThrow(Disk *disk, Vector2 direction);
 

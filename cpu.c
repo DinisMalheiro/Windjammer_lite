@@ -14,29 +14,29 @@ static void CPUSetAnimation(CPU *cpu, int row)
 
 void CPUInit(CPU *cpu, Vector2 position, Rectangle area)
 {
+    *cpu = (CPU){0};
+
     cpu->position = position;
-    cpu->velocity = (Vector2){0};
-    cpu->returning = false;
-    cpu->throwAngle = 60.0f;
+    cpu->area = area;
 
     cpu->speed = 150.0f;
     cpu->catchRadius = 20.0f;
+    cpu->throwAngle = 60.0f;
 
     cpu->hasDisk = false;
 
     cpu->throwTimer = 0.0f;
-    cpu->throwDelay = 1.0f;
+    cpu->throwDelay = 0.2f;
 
     cpu->moveTimer = 0.0f;
-    cpu->moveDelay = 0.5f; 
+    cpu->moveDelay = 0.5f;
 
     cpu->homeY = position.y;
-    cpu->area = area;
+    cpu->returning = false;
 
     cpu->side = PLAYER_SIDE_RIGHT;
 
-    cpu->sprite = (Texture2D){0};
-
+    // Sprite sheet
     cpu->frame = 0;
     cpu->currentRow = 4;
     cpu->columns = 5;
@@ -44,8 +44,12 @@ void CPUInit(CPU *cpu, Vector2 position, Rectangle area)
     cpu->frameWidth = 64;
     cpu->frameHeight = 64;
 
+    // Animation
     cpu->animationTimer = 0.0f;
     cpu->frameTime = 0.12f;
+
+    // Start directly on idle animation.
+    cpu->currentRow = 4;
 }
 
 void CPUUpdate(CPU *cpu, const Player *player, Disk *disk)
@@ -54,7 +58,7 @@ void CPUUpdate(CPU *cpu, const Player *player, Disk *disk)
 
     cpu->velocity = (Vector2){0};
 
-    // CPU has disk: cannot move, wait then throw
+    // CPU has the disk: wait before throwing.
     if (cpu->hasDisk)
     {
         CPUSetAnimation(cpu, 4);
@@ -68,16 +72,11 @@ void CPUUpdate(CPU *cpu, const Player *player, Disk *disk)
         int throwType = GetRandomValue(0, 4);
         float angle = 0.0f;
 
-        if (throwType == 0)
-            angle = -cpu->throwAngle;
-        else if (throwType == 1)
-            angle = -cpu->throwAngle * 0.5f;
-        else if (throwType == 2)
-            angle = 0.0f;
-        else if (throwType == 3)
-            angle = cpu->throwAngle * 0.5f;
-        else if (throwType == 4)
-            angle = cpu->throwAngle;
+        if (throwType == 0) angle = -cpu->throwAngle;
+        else if (throwType == 1) angle = -cpu->throwAngle * 0.5f;
+        else if (throwType == 2) angle = 0.0f;
+        else if (throwType == 3) angle = cpu->throwAngle * 0.5f;
+        else angle = cpu->throwAngle;
 
         float radians = angle * DEG2RAD;
 
@@ -97,33 +96,7 @@ void CPUUpdate(CPU *cpu, const Player *player, Disk *disk)
         goto animation;
     }
 
-    /*
-    // Delay before returning to center
-    if (cpu->returning && cpu->moveTimer > 0.0f)
-    {
-        cpu->moveTimer -= deltaTime;
-        goto animation;
-    }
-
-    // Return to center
-    if (cpu->returning)
-    {
-        float difference = cpu->homeY - cpu->position.y;
-
-        if (fabsf(difference) > 2.0f)
-        {
-            cpu->velocity.y = difference > 0.0f ? 1.0f : -1.0f;
-            cpu->position.y += cpu->velocity.y * cpu->speed * deltaTime;
-            goto animation;
-        }
-
-        cpu->position.y = cpu->homeY;
-        cpu->returning = false;
-        goto animation;
-    }
-    */
-
-    // Only defend when the disk enters CPU's area
+    // Only defend when the disk enters the CPU's area.
     if (disk->thrown && CheckCollisionPointRec(disk->position, cpu->area))
     {
         float difference = disk->position.y - cpu->position.y;
@@ -146,7 +119,7 @@ void CPUUpdate(CPU *cpu, const Player *player, Disk *disk)
         }
     }
 
-    // Keep CPU inside its area
+    // Keep CPU inside its area.
     if (cpu->position.y < cpu->area.y)
         cpu->position.y = cpu->area.y;
 
@@ -176,7 +149,7 @@ animation:
 
 void CPUDraw(const CPU *cpu)
 {
-    if (cpu->sprite.id != 0)
+    if (cpu->sprite != 0)
     {
         Rectangle sourceRec = {
             (float)(cpu->frame * cpu->frameWidth),
@@ -193,11 +166,11 @@ void CPUDraw(const CPU *cpu)
         };
 
         Vector2 origin = {
-            (float)cpu->frameWidth / 2.0f,
-            (float)cpu->frameHeight / 2.0f
+            cpu->frameWidth / 2.0f,
+            cpu->frameHeight / 2.0f
         };
 
-        DrawTexturePro(cpu->sprite, sourceRec, destRec, origin, 0.0f, WHITE);
+        DrawTexturePro(*cpu->sprite, sourceRec, destRec, origin, 0.0f, WHITE);
     }
     else
     {
@@ -205,19 +178,17 @@ void CPUDraw(const CPU *cpu)
     }
 }
 
-void CPUSetTexture(CPU *cpu, const char *texturePath)
+void CPUSetTexture(CPU *cpu, Texture2D *texture)
 {
-    if (cpu->sprite.id != 0)
-        UnloadTexture(cpu->sprite);
-
-    cpu->sprite = LoadTexture(texturePath);
+    // CPU only stores the pointer.
+    // GameAssets owns the actual texture.
+    cpu->sprite = texture;
 }
 
 void CPUUnload(CPU *cpu)
 {
-    if (cpu->sprite.id != 0)
-    {
-        UnloadTexture(cpu->sprite);
-        cpu->sprite = (Texture2D){0};
-    }
+    // Texture belongs to GameAssets.
+    cpu->sprite = 0;
 }
+
+
