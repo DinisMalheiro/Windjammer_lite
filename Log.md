@@ -129,7 +129,7 @@
 
 
 
-## ession 6 – 26/08/2026
+## Session 6 – 26/08/2026
 
 **Todays implementations:**
     1- Added in-game countdown timer display
