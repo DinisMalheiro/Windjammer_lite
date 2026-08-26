@@ -220,7 +220,7 @@ void PlayerSetTexture(Player *player, Texture2D *texture)
 
 void PlayerUnload(Player *player)
 {
-    // Do NOT unload the texture here.
+    // Do not unload the texture here.
     // The texture belongs to GameAssets.
     player->sprite = 0;
 }

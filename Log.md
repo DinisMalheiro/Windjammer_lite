@@ -122,9 +122,37 @@
     2- Add game UI
     3- Add score display
     4- Add countdown/game timer display
-    5- Add camera shake when a goal is scored
-    6- Continue improving menus and audio
+    5- Continue improving menus and audio
 
 **What was written:**
     1- Approximately 500+ lines of code
 
+
+
+## ession 6 – 26/08/2026
+
+**Todays implementations:**
+    1- Added in-game countdown timer display
+    2- Added player and CPU points display
+    3- Added GAME_SCREEN_ROUND_END state
+    4- Added automatic round ending when the timer reaches zero
+    5- Added round-end screen showing final points
+    6- Added winner, loser and draw detection
+    7- Added temporary ENTER restart control
+    8- Added temporary ESC return-to-menu control
+    9- Added game reset when restarting a round
+    10- Stopped gameplay updates when the round ends
+
+**Difficulties:**
+    1- Making sure gameplay completely stops when the timer reaches zero
+    2- Resetting the match correctly when restarting
+
+**Todo next:**
+    1- Replace temporary round-end controls with a proper selectable menu
+    2- Improve game UI
+    3- Restructure the code
+    4- Add more mechanics
+    5- Do what the original game has and this doesnt :D
+
+**What was written:**
+    1- Approximately 150+ lines of code

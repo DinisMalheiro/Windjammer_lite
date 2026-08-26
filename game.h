@@ -14,7 +14,8 @@ typedef enum GameScreen
 {
     GAME_SCREEN_MENU,
     GAME_SCREEN_GAMEPLAY,
-    GAME_SCREEN_PAUSE
+    GAME_SCREEN_PAUSE,
+    GAME_SCREEN_ROUND_END
 } GameScreen;
 
 typedef struct Goal
