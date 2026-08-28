@@ -38,7 +38,7 @@ typedef struct Player
     float throwTimer;
     float throwDelay;
 
-    // Shared sprite asset
+    // Pointer to texture owned by GameAssets
     Texture2D *sprite;
 
     // Sprite sheet
@@ -61,7 +61,6 @@ void PlayerDraw(const Player *player);
 void PlayerUnload(Player *player);
 void PlayerSetTexture(Player *player, Texture2D *texture);
 void PlayerUpdateMapLimits(Player *player, Rectangle area);
-
 Vector2 PlayerGetThrowDirection(const Player *player);
 
 #endif

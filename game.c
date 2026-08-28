@@ -325,6 +325,48 @@ static void GameUpdateDiskCollision(Game *game) {
   }
 }
 
+//Recursive function for project grade, but not the best one. It is better to use the commented version below.
+static int GameGetGoalZone(const Goal *goal, Vector2 diskPosition)
+{
+    static int zone = 1;
+
+    if (diskPosition.y < goal->top || diskPosition.y > goal->bottom)
+    {
+        zone = 1;
+        return 0;
+    }
+
+    if (zone == 1 && diskPosition.y < goal->zone1Bottom)
+    {
+        zone = 1;
+        return 1;
+    }
+
+    if (zone == 2 && diskPosition.y < goal->zone2Bottom)
+    {
+        zone = 1;
+        return 2;
+    }
+
+    if (zone == 3 && diskPosition.y <= goal->bottom)
+    {
+        zone = 1;
+        return 3;
+    }
+
+    if (zone <= 3)
+    {
+        zone++;
+        int result = GameGetGoalZone(goal, diskPosition);
+        zone = 1;
+        return result;
+    }
+
+    zone = 1;
+    return 0;
+}
+
+/* old version & best one!
 static int GameGetGoalZone(const Goal *goal, Vector2 diskPosition) {
   if (diskPosition.y < goal->top)
     return 0;
@@ -340,7 +382,7 @@ static int GameGetGoalZone(const Goal *goal, Vector2 diskPosition) {
 
   return 0;
 }
-
+*/
 static void GameHandleGoal(Game *game, int side, int zone) {
   if (side < 0) {
     GameStartShake(game, 0.35f, 5.0f);
